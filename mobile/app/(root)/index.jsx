@@ -1,7 +1,7 @@
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import { useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import { Alert, FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from "react-native";
-import { SignOutButton } from "@/components/SignOutButton";
+import { COLORS } from "../../constants/colors";
 import { useTransactions } from "../../hooks/useTransactions";
 import { useEffect, useState } from "react";
 import PageLoader from "../../components/PageLoader";
@@ -17,7 +17,7 @@ export default function Page() {
   const [refreshing, setRefreshing] = useState(false);
 
   const { transactions, summary, isLoading, loadData, deleteTransaction } = useTransactions(
-    user.id
+    user?.id
   );
 
   const onRefresh = async () => {
@@ -37,7 +37,8 @@ export default function Page() {
     ]);
   };
 
-  if (isLoading && !refreshing) return <PageLoader />;
+  // Show loader if user is not loaded or data is loading
+  if (!user || (isLoading && !refreshing)) return <PageLoader />;
 
   return (
     <View style={styles.container}>
@@ -60,11 +61,9 @@ export default function Page() {
           </View>
           {/* RIGHT */}
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
-              <Ionicons name="add" size={20} color="#FFF" />
-              <Text style={styles.addButtonText}>Add</Text>
+            <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/settings")}> 
+              <Ionicons name="settings-outline" size={24} color={COLORS.text} />
             </TouchableOpacity>
-            <SignOutButton />
           </View>
         </View>
 

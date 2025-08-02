@@ -10,6 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
 import { useState } from "react";
+import PageLoader from "../../components/PageLoader";
 import { API_URL } from "../../constants/api";
 import { styles } from "../../assets/styles/create.styles";
 import { COLORS } from "../../constants/colors";
@@ -37,6 +38,7 @@ const CreateScreen = () => {
 
   const handleCreate = async () => {
     // validations
+    if (!user?.id) return Alert.alert("Error", "User not authenticated");
     if (!title.trim()) return Alert.alert("Error", "Please enter a transaction title");
     if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
       Alert.alert("Error", "Please enter a valid amount");
@@ -58,7 +60,7 @@ const CreateScreen = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: user.id,
+          user_id: user?.id,
           title,
           amount: formattedAmount,
           category: selectedCategory,
@@ -80,6 +82,9 @@ const CreateScreen = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loader if user is not loaded
+  if (!user) return <PageLoader />;
 
   return (
     <View style={styles.container}>

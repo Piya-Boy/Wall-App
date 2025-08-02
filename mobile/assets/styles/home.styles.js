@@ -79,6 +79,16 @@ export const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  settingsButton: {
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: COLORS.card,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
   balanceCard: {
     backgroundColor: COLORS.card,
     borderRadius: 20,
