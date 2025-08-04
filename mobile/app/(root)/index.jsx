@@ -1,9 +1,9 @@
 import { useUser } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Alert, FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { COLORS } from "../../constants/colors";
 import { useTransactions } from "../../hooks/useTransactions";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import PageLoader from "../../components/PageLoader";
 import { styles } from "../../assets/styles/home.styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,19 +16,27 @@ export default function Page() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
-  const { transactions, summary, isLoading, loadData, deleteTransaction } = useTransactions(
+  const { transactions, summary, isLoading, loadData, refreshData, deleteTransaction } = useTransactions(
     user?.id
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadData();
+    await refreshData();
     setRefreshing(false);
   };
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Refresh data every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Screen focused - refreshing data");
+      refreshData();
+    }, [refreshData])
+  );
 
   const handleDelete = (id) => {
     Alert.alert("Delete Transaction", "Are you sure you want to delete this transaction?", [

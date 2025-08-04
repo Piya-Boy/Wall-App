@@ -60,22 +60,46 @@ export async function deleteTransaction(req, res) {
   }
 }
 
+export async function getBalanceOverTime(req, res) {
+  try {
+    const { userId } = req.params;
+
+    const transactions = await sql`
+      SELECT CAST(amount AS DECIMAL(10, 2)) as amount, created_at as date 
+      FROM transactions 
+      WHERE user_id = ${userId} 
+      ORDER BY created_at ASC
+    `;
+
+    let cumulativeBalance = 0;
+    const balanceOverTime = transactions.map(t => {
+      cumulativeBalance += parseFloat(t.amount);
+      return { date: t.date, balance: cumulativeBalance };
+    });
+
+    res.status(200).json(balanceOverTime);
+  } catch (error) {
+    console.log("Error getting balance over time", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export async function getSummaryByUserId(req, res) {
   try {
     const { userId } = req.params;
 
     const balanceResult = await sql`
-      SELECT COALESCE(SUM(amount), 0) as balance FROM transactions WHERE user_id = ${userId}
+      SELECT COALESCE(SUM(CAST(amount AS DECIMAL(10,2))), 0) as balance FROM transactions WHERE user_id = ${userId}
     `;
 
     const incomeResult = await sql`
-      SELECT COALESCE(SUM(amount), 0) as income FROM transactions
-      WHERE user_id = ${userId} AND amount > 0
+      SELECT COALESCE(SUM(CAST(amount AS DECIMAL(10,2))), 0) as income FROM transactions
+      WHERE user_id = ${userId} AND CAST(amount AS DECIMAL(10,2)) > 0
     `;
 
     const expensesResult = await sql`
-      SELECT COALESCE(SUM(amount), 0) as expenses FROM transactions
-      WHERE user_id = ${userId} AND amount < 0
+      SELECT COALESCE(SUM(CAST(amount AS DECIMAL(10,2))), 0) as expenses FROM transactions
+      WHERE user_id = ${userId} AND CAST(amount AS DECIMAL(10,2)) < 0
     `;
 
     res.status(200).json({
@@ -85,6 +109,19 @@ export async function getSummaryByUserId(req, res) {
     });
   } catch (error) {
     console.log("Error gettin the summary", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getAllTransactions(req, res) {
+  try {
+    const allTransactions = await sql`
+      SELECT * FROM transactions ORDER BY created_at DESC
+    `;
+    console.log("Backend - All transactions in database:", allTransactions);
+    res.status(200).json(allTransactions);
+  } catch (error) {
+    console.log("Error getting all transactions", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }

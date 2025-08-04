@@ -73,8 +73,15 @@ const CreateScreen = () => {
         throw new Error(errorData.error || "Failed to create transaction");
       }
 
-      Alert.alert("Success", "Transaction created successfully");
-      router.back();
+      Alert.alert("Success", "Transaction created successfully", [
+        {
+          text: "OK",
+          onPress: () => {
+            // Navigate back - the useFocusEffect in other screens will handle the refresh
+            router.back();
+          }
+        }
+      ]);
     } catch (error) {
       Alert.alert("Error", error.message || "Failed to create transaction");
       console.error("Error creating transaction:", error);
